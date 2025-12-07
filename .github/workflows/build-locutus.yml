@@ -11,7 +11,14 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: recursive
+
+      - name: Fix XP toolset (replace v141_xp -> v142)
+        run: |
+          (Get-ChildItem -Recurse -Filter *.vcxproj) | ForEach-Object {
+            (Get-Content $_.FullName) -replace 'v141_xp', 'v142' |
+              Set-Content $_.FullName
+          }
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
