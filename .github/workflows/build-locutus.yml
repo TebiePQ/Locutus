@@ -13,11 +13,21 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Fix XP toolset (replace v141_xp -> v142)
+      - name: Fix toolset and Windows SDK
+        shell: pwsh
         run: |
-          (Get-ChildItem -Recurse -Filter *.vcxproj) | ForEach-Object {
-            (Get-Content $_.FullName) -replace 'v141_xp', 'v142' |
-              Set-Content $_.FullName
+          Get-ChildItem -Recurse -Filter *.vcxproj | ForEach-Object {
+            $path = $_.FullName
+            $content = Get-Content $path
+
+            # 把 v141_xp 换成 v142（使用 VS2019 工具链）
+            $content = $content -replace 'v141_xp', 'v142'
+
+            # 把 Windows SDK 8.1 换成 10.0
+            $content = $content -replace '<WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>',
+                                             '<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>'
+
+            Set-Content -Path $path -Value $content
           }
 
       - name: Setup MSBuild
